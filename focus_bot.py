@@ -1,5 +1,6 @@
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
 from telegram import InlineKeyboardButton,InlineKeyboardMarkup
+from aiogram import Bot, Dispatcher, types
 import random
 import datetime
 
@@ -10,7 +11,7 @@ def get_welcome_keyboard():
     keyboard = [
         [InlineKeyboardButton("📅 Расписание", callback_data='schedule')],
         [InlineKeyboardButton("🎒 Что взять", callback_data='what_to_take')],
-        [InlineKeyboardButton("📰 Новости", callback_data='news')],
+        [InlineKeyboardButton("📍 Где находимся", callback_data='news')],
     ]
     return InlineKeyboardMarkup(keyboard)
 

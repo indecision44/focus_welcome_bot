@@ -1,6 +1,6 @@
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
 from telegram import InlineKeyboardButton,InlineKeyboardMarkup
-from aiogram import Bot, Dispatcher, types
+#from aiogram import Bot, Dispatcher, types
 import random
 import datetime
 
@@ -19,7 +19,7 @@ def get_welcome_keyboard():
 #ТЕСТОВЫЕ КОМАНДЫ OPEN
 ######################
 
-async def test_join(update, context):
+async def test_join(update, context): #вызывается функция командой /test1
     """Имитирует вход нового участника"""
     test_name = "ТестовыйНовичок"
     
@@ -139,3 +139,19 @@ if __name__ == '__main__':
     app.add_handler(MessageHandler(filters.StatusUpdate.ALL, track_gym_members))
     app.add_handler(CommandHandler("test1", test_join))  # имитация входа
     app.run_polling()
+
+    
+    # 1. Проверить, какие файлы изменились/добавились
+    #git status
+
+    # 2. Добавить все файлы в отслеживаемые
+    #git add .
+
+    # Или только конкретные файлы:
+    #git add focus_bot.py requirements.txt Dockerfile
+
+    # 3. Создать коммит с описанием изменений
+    #git commit -m "Добавил Dockerfile и обновил бота"
+
+    # 4. Отправить на GitHub
+    #git push

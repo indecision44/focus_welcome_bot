@@ -136,9 +136,13 @@ async def setup_webhook():
     print(f"📡 Текущий webhook: {webhook_info.url}")
     return True
 
-def main():
+async def main():
     global application
     
+    if not TOKEN:
+        print("Ошибка: TELEGRAM_BOT_TOKEN не установлен")
+        sys.exit(1)
+        
     # Запускаем без проверки токена (он у вас жестко задан)
     print("🏋️‍♂️ СПОРТИВНЫЙ БОТ ЗАПУЩЕН НА RENDER")
     print("📅 Режим: Webhook")
@@ -153,7 +157,7 @@ def main():
     application.add_handler(CommandHandler("test2", test_leave))
     
     # Инициализируем бота
-    application.bot.initialize()
+    await application.bot.initialize()
     
     # Настраиваем aiohttp веб-сервер
     app = web.Application()
@@ -161,18 +165,14 @@ def main():
     app.router.add_get("/health", health)
     
     # Устанавливаем webhook
-    import asyncio
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(setup_webhook())
-    
-    # Запускаем веб-сервер
+    await setup_webhook()
     port = int(os.environ.get("PORT", 8080))
     print(f"🚀 Старт сервера на порту {port}")
     web.run_app(app, host='0.0.0.0', port=port)
 
 if __name__ == '__main__':
-    main()
+    import asyncio
+    asyncio.run(main())
 
     
     # 1. Проверить, какие файлы изменились/добавились

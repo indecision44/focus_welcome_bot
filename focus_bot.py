@@ -9,6 +9,8 @@ import sys
 import asyncio
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+if not TOKEN:
+    raise ValueError("TELEGRAM_BOT_TOKEN not set")
 
 def get_welcome_keyboard():
     keyboard = [
@@ -67,112 +69,87 @@ FAREWELLS = [
     "🏆 {name} в зале! Новые рекорды уже близко"
 ]
 
-async def test_join(update, context):
-    test_name = "ТестовыйНовичок"
-    await update.message.reply_text("🧪 **ТЕСТ ВХОДА**\nИмитирую появление нового участника...")
-    greeting = random.choice(GREETINGS).format(name=test_name)
-    await update.message.reply_text(greeting)
-    await update.message.reply_text(MANDATORY_GREETING)
-    await update.message.reply_text(
-        f"👋 {test_name}, что тебя интересует?",
-        reply_markup=get_welcome_keyboard()
-    )
-    time_now = datetime.datetime.now().strftime("%H:%M:%S")
-    print(f"🧪 [{time_now}] Тест входа от {update.effective_user.first_name}")
-
-async def test_leave(update, context):
-    test_name = "ТестовыйНовичок"
-    await update.message.reply_text("🧪 **ТЕСТ ВЫХОДА**\nИмитирую уход участника...")
-    farewell = random.choice(FAREWELLS).format(name=test_name)
-    await update.message.reply_text(farewell)
-    time_now = datetime.datetime.now().strftime("%H:%M:%S")
-    print(f"🧪 [{time_now}] Тест выхода от {update.effective_user.first_name}")
-
-async def track_gym_members(update, context):
+async def track_gym_members(update: Update, context):
     if update.message and update.message.new_chat_members:
         for user in update.message.new_chat_members:
             if not user.is_bot:
                 greeting = random.choice(GREETINGS).format(name=user.first_name)
                 await update.message.reply_text(greeting)
                 await update.message.reply_text(MANDATORY_GREETING)
-                time_now = datetime.datetime.now().strftime("%H:%M")
-                print(f"✅ [{time_now}] {user.first_name} зашел в зал")
-    
     if update.message and update.message.left_chat_member:
         user = update.message.left_chat_member
         if not user.is_bot:
             farewell = random.choice(FAREWELLS).format(name=user.first_name)
             await update.message.reply_text(farewell)
-            time_now = datetime.datetime.now().strftime("%H:%M")
-            print(f"👋 [{time_now}] {user.first_name} вышел")
 
-# === НОВАЯ ЧАСТЬ: для работы на Render ===
+async def test_join(update: Update, context):
+    test_name = "ТестовыйНовичок"
+    await update.message.reply_text("🧪 **ТЕСТ ВХОДА**\nИмитирую появление нового участника...")
+    greeting = random.choice(GREETINGS).format(name=test_name)
+    await update.message.reply_text(greeting)
+    await update.message.reply_text(MANDATORY_GREETING)
+    await update.message.reply_text(f"👋 {test_name}, что тебя интересует?", reply_markup=get_welcome_keyboard())
+
+async def test_leave(update: Update, context):
+    test_name = "ТестовыйНовичок"
+    await update.message.reply_text("🧪 **ТЕСТ ВЫХОДА**\nИмитирую уход участника...")
+    farewell = random.choice(FAREWELLS).format(name=test_name)
+    await update.message.reply_text(farewell)
+
+# ========== Webhook обработчик для aiohttp ==========
+async def webhook(request):
+    """Принимает JSON от Telegram и передаёт в приложение бота"""
+    try:
+        data = await request.json()
+        # Создаём объект Update из JSON
+        update = Update.de_json(data, bot_application.bot)
+        # Ставим задачу на обработку в фоне (чтобы не блокировать ответ)
+        asyncio.create_task(bot_application.process_update(update))
+        return web.Response(text="OK")
+    except Exception as e:
+        print(f"Ошибка webhook: {e}")
+        return web.Response(text="Error", status=500)
+
 async def health(request):
     return web.Response(text="OK")
 
-async def webhook_handler(request):
-    try:
-        data = await request.json()
-        await application.process_update(data)
-        return web.Response(text="OK")
-    except Exception as e:
-        print(f"Ошибка: {e}")
-        return web.Response(text="Error", status=500)
+# Глобальная переменная для приложения бота
+bot_application = None
 
-async def setup_webhook():
-    render_url = os.environ.get("RENDER_EXTERNAL_URL")
-    if not render_url:
-        # Заглушка — впишите свой URL из Render
-        render_url = "https://focus-welcome-bot.onrender.com"
+async def main():
+    global bot_application
+    bot_application = Application.builder().token(TOKEN).build()
+    
+    # Добавляем обработчики
+    bot_application.add_handler(MessageHandler(filters.StatusUpdate.ALL, track_gym_members))
+    bot_application.add_handler(CommandHandler("test1", test_join))
+    bot_application.add_handler(CommandHandler("test2", test_leave))
+    
+    await bot_application.initialize()
+    await bot_application.start()
+    
+    # Устанавливаем webhook
+    render_url = os.environ.get("RENDER_EXTERNAL_URL", "https://focus-welcome-bot.onrender.com")
     webhook_url = f"{render_url}/webhook/{TOKEN}"
-    await application.bot.set_webhook(webhook_url)
+    await bot_application.bot.set_webhook(webhook_url)
     print(f"✅ Webhook установлен: {webhook_url}")
-    return True
     
-    webhook_url = f"{render_url}/webhook/{TOKEN}"
-    await application.bot.set_webhook(webhook_url)
-    print(f"✅ Webhook установлен: {webhook_url}")
-    return True
+    # Запускаем aiohttp сервер
+    app = web.Application()
+    app.router.add_post(f"/webhook/{TOKEN}", webhook)
+    app.router.add_get("/health", health)
+    
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", int(os.environ.get("PORT", 8080)))
+    await site.start()
+    print("🚀 Бот запущен и слушает webhook")
+    
+    # Держим сервер запущенным
+    await asyncio.Event().wait()
 
-def main():
-    global application
-    
-    if not TOKEN:
-        print("Ошибка: TELEGRAM_BOT_TOKEN не установлен")
-        sys.exit(1)
-    
-    print("🏋️‍♂️ СПОРТИВНЫЙ БОТ ЗАПУЩЕН НА RENDER")
-    print("📅 Режим: Webhook")
-    
-    application = Application.builder().token(TOKEN).build()
-    application.add_handler(MessageHandler(filters.StatusUpdate.ALL, track_gym_members))
-    application.add_handler(CommandHandler("test1", test_join))
-    application.add_handler(CommandHandler("test2", test_leave))
-    
-    # Запускаем всё в одном цикле
-    async def start():
-        await application.bot.initialize()
-        await setup_webhook()
-        
-        app = web.Application()
-        app.router.add_post(f"/webhook/{TOKEN}", webhook_handler)
-        app.router.add_get("/health", health)
-        
-        port = int(os.environ.get("PORT", 8080))
-        print(f"🚀 Старт сервера на порту {port}")
-        
-        runner = web.AppRunner(app)
-        await runner.setup()
-        site = web.TCPSite(runner, '0.0.0.0', port)
-        await site.start()
-        
-        # Держим сервер работающим
-        await asyncio.Event().wait()
-    
-    asyncio.run(start())
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    asyncio.run(main())
 
     
     # 1. Проверить, какие файлы изменились/добавились

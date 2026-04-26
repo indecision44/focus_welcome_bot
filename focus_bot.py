@@ -1,6 +1,6 @@
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import Application, MessageHandler, filters, CommandHandler, CallbackQueryHandler
+from telegram.ext import Application, MessageHandler, filters, CommandHandler, CallbackQueryHandler, ContextTypes
 from aiohttp import web
 import random
 import datetime
@@ -12,6 +12,7 @@ TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not TOKEN:
     raise ValueError("TELEGRAM_BOT_TOKEN not set")
 
+#Обработчик кнопок
 def get_private_keyboard():
     keyboard = [
         [InlineKeyboardButton("📅 Расписание", callback_data='schedule')],
@@ -109,13 +110,20 @@ FAREWELLS = [
     "✅ {name}, тренировка завершена. Молодец!"
 ]
 
-async def track_gym_members(update: Update, context):
+async def track_gym_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message and update.message.new_chat_members:
         for user in update.message.new_chat_members:
             if not user.is_bot:
                 greeting = random.choice(GREETINGS).format(name=user.first_name)
                 await update.message.reply_text(greeting)
                 await update.message.reply_text(MANDATORY_GREETING)
+                
+                bot_username = (await context.bot.get_me()).username
+                keyboard = [[InlineKeyboardButton("🔵 Начать общение", url=f"https://t.me/{bot_username}")]]
+                await update.message.reply_text(
+                    f"👋 {user.first_name}, нажми на кнопку ниже, чтобы открыть чат со мной.",
+                    reply_markup=InlineKeyboardMarkup(keyboard)
+                )
     if update.message and update.message.left_chat_member:
         user = update.message.left_chat_member
         if not user.is_bot:

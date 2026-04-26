@@ -1,6 +1,6 @@
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes
+from telegram.ext import Application, MessageHandler, filters, CommandHandler, CallbackQueryHandler
 from aiohttp import web
 import random
 import datetime
@@ -12,13 +12,43 @@ TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not TOKEN:
     raise ValueError("TELEGRAM_BOT_TOKEN not set")
 
-def get_welcome_keyboard():
+def get_private_keyboard():
     keyboard = [
         [InlineKeyboardButton("📅 Расписание", callback_data='schedule')],
         [InlineKeyboardButton("🎒 Что взять", callback_data='what_to_take')],
-        [InlineKeyboardButton("📍 Где находимся", callback_data='news')],
+        [InlineKeyboardButton("📍 Где находимся", callback_data='location')],
+        [InlineKeyboardButton("📢 Новости", callback_data='news')],
     ]
     return InlineKeyboardMarkup(keyboard)
+async def start(update: Update, context):
+    await update.message.reply_text(
+        "👋 Добро пожаловать в Focus!\n\nВыбери интересующий раздел:",
+        reply_markup=get_private_keyboard()
+    )
+
+async def private_info(update: Update, context):
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data == 'schedule':
+        text = "📅 Расписание: Пн/Ср/Пт 19:00"
+    elif query.data == 'what_to_take':
+        text = "🎒 Что взять: Бутылка воды, полотенце"
+    elif query.data == 'location':
+        text = "📍 Адрес: ул. Примерная, д. 10"
+    elif query.data == 'news':
+        text = "📢 Новости: Завтра тренировка переносится"
+    else:
+        text = "Информация обновляется"
+    
+    await query.edit_message_text(text)
+# def get_welcome_keyboard():
+#     keyboard = [
+#         [InlineKeyboardButton("📅 Расписание", callback_data='schedule')],
+#         [InlineKeyboardButton("🎒 Что взять", callback_data='what_to_take')],
+#         [InlineKeyboardButton("📍 Где находимся", callback_data='news')],
+#     ]
+#     return InlineKeyboardMarkup(keyboard)
 
 # Приветствия для спортзала
 GREETINGS = [
@@ -51,12 +81,7 @@ GREETINGS = [
     "🦵 {name} пришел! Присед со штангой или на тренажере?",
     "💪 {name} в зале! Бицепс 40 см будет?",
     "🔥 {name} с нами! Становая тяга ждет",
-    "🎯 {name} явился! Турник свободен, беги"
-]
-
-MANDATORY_GREETING = "📢 Добро пожаловать в чат Focus!🔴🔵⚪️\n\nFocus — это энергичные групповые тренировки по 45 минут с постоянно обновляющимися программами, сочетанием силы, кардио и сильной командной атмосферой. Каждое занятие - новый формат, чтобы тело постоянно прогрессировало.\n\n📎В закреплённых сообщениях — важная информация.\n\nЕсли ты здесь впервые - записывайся на свою первую бесплатную тренировку (Вкладка «📅Расписание») и почувствуй формат на практике🔥"
-
-FAREWELLS = [
+    "🎯 {name} явился! Турник свободен, беги",
     "💪 {name} в игре! Разминайся",
     "🔥 {name} зашел на рекорд!",
     "🏋️ {name} с нами! Ждем новых достижений",
@@ -67,6 +92,21 @@ FAREWELLS = [
     "💫 {name} присоединился! Рабочая атмосфера обеспечена",
     "👊 {name} с нами! Жми лежа, не лежа",
     "🏆 {name} в зале! Новые рекорды уже близко"
+]
+
+MANDATORY_GREETING = "📢 Добро пожаловать в чат Focus!🔴🔵⚪️\n\nFocus — это энергичные групповые тренировки по 45 минут с постоянно обновляющимися программами, сочетанием силы, кардио и сильной командной атмосферой. Каждое занятие - новый формат, чтобы тело постоянно прогрессировало.\n\n📎В закреплённых сообщениях — важная информация.\n\nЕсли ты здесь впервые - записывайся на свою первую бесплатную тренировку (Вкладка «📅Расписание») и почувствуй формат на практике🔥"
+
+FAREWELLS = [
+    "👋 {name}, надеюсь, ты вернешься! Тренировки ждут.",
+    "😢 {name} покинул зал... Всегда рады видеть снова!",
+    "💪 {name} ушел, но сила осталась с нами. Возвращайся!",
+    "🏃 {name} убежал дожимать? Ждем обратно с новыми рекордами!",
+    "🕐 {name} закончил тренировку. Отличная работа!",
+    "👋 {name}, не забывай — зал всегда открыт для тебя.",
+    "🤝 {name}, до новых встреч! Пусть мышцы отдыхают.",
+    "💪 {name} вышел, но его результаты остаются в чате.",
+    "🔥 {name}, хорошего восстановления! Ждем снова.",
+    "✅ {name}, тренировка завершена. Молодец!"
 ]
 
 async def track_gym_members(update: Update, context):
@@ -124,7 +164,8 @@ async def main():
     bot_application.add_handler(MessageHandler(filters.StatusUpdate.ALL, track_gym_members))
     bot_application.add_handler(CommandHandler("test1", test_join))
     bot_application.add_handler(CommandHandler("test2", test_leave))
-    
+    bot_application.add_handler(CommandHandler("start", start))
+    bot_application.add_handler(CallbackQueryHandler(private_info))
     await bot_application.initialize()
     await bot_application.start()
     
@@ -166,3 +207,7 @@ if __name__ == "__main__":
 
     # 4. Отправить на GitHub
     #git push
+
+    # 5. Комментарий
+    #Закомментировать: Ctrl + K, Ctrl + C (сначала зажать Ctrl+K, затем не отпуская Ctrl, нажать C)
+    #Раскомментировать: Ctrl + K, Ctrl + U

@@ -32,9 +32,9 @@ async def private_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     if query.data == 'schedule':
-        text = "📅 Расписание находится на вкладке 'расписание'. Обновляется каждую неделю! Бегом записываться🏃🏃🏃!!!\n\nЕсли после голосования ваши планы изменились и вы не сможете прийти на тренировку,пожалуйста, отмените свой голос в опросе ❌(или переголосуйте🔄).\n\n Это поможет тренеру и нам точнее понимать, сколько человек будет.Спасибо за понимание! 🙌\n\n⚠️ Важно: не сможете прийти — отмените свой голос в опросе ❌"
+        text = "📅 Расписание находится на вкладке 📅расписание. Обновляется каждую неделю! Бегом записываться🏃🏃🏃!!!\n\nЕсли после голосования ваши планы изменились и вы не сможете прийти на тренировку,пожалуйста, отмените свой голос в опросе ❌(или переголосуйте🔄).\n\n Это поможет тренеру и нам точнее понимать, сколько человек будет.Спасибо за понимание! 🙌\n\n⚠️ Важно: не сможете прийти — отмените свой голос в опросе ❌"
     elif query.data == 'what_to_take':
-        text = "🎒 Что взять на тренировку:\n\n✅ удобная обувь \n\n✅ удобная одежда \n\n✅ полотенце \n\n✅ вода / бутылка для воды\n\n✅ хорошее настроение Бутылка воды, полотенце"
+        text = "🎒 Что взять на тренировку:\n✅ удобная обувь \n✅ удобная одежда \n✅ полотенце \n✅ вода / бутылка для воды\n✅ хорошее настроение Бутылка воды, полотенце"
     elif query.data == 'location':
         text = "📍 Адрес: проспект Дзержинского, 19 (вход с ул.Щорса, 2 эт., над Белинвестабанком)"
     elif query.data == 'news':
@@ -139,7 +139,7 @@ async def test_join(update: Update, context):
     greeting = random.choice(GREETINGS).format(name=test_name)
     await update.message.reply_text(greeting)
     await update.message.reply_text(MANDATORY_GREETING)
-    await update.message.reply_text(f"👋 {test_name}, что тебя интересует?", reply_markup=get_welcome_keyboard())
+    await update.message.reply_text(f"👋 {test_name}, что тебя интересует?", reply_markup=get_private_keyboard())
 
 async def test_leave(update: Update, context):
     test_name = "ТестовыйНовичок"

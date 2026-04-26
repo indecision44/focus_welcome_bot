@@ -32,13 +32,13 @@ async def private_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     if query.data == 'schedule':
-        text = "📅 Расписание: Пн/Ср/Пт 19:00"
+        text = "📅 Расписание находится на вкладке 'расписание'. Обновляется каждую неделю! Бегом записываться🏃🏃🏃!!!\n\nЕсли после голосования ваши планы изменились и вы не сможете прийти на тренировку,пожалуйста, отмените свой голос в опросе ❌(или переголосуйте🔄).\n\n Это поможет тренеру и нам точнее понимать, сколько человек будет.Спасибо за понимание! 🙌\n\n⚠️ Важно: не сможете прийти — отмените свой голос в опросе ❌"
     elif query.data == 'what_to_take':
-        text = "🎒 Что взять: Бутылка воды, полотенце"
+        text = "🎒 Что взять на тренировку:\n\n✅ удобная обувь \n\n✅ удобная одежда \n\n✅ полотенце \n\n✅ вода / бутылка для воды\n\n✅ хорошее настроение Бутылка воды, полотенце"
     elif query.data == 'location':
-        text = "📍 Адрес: ул. Примерная, д. 10"
+        text = "📍 Адрес: проспект Дзержинского, 19 (вход с ул.Щорса, 2 эт., над Белинвестабанком)"
     elif query.data == 'news':
-        text = "📢 Новости: Завтра тренировка переносится"
+        text = "📢 Новости: Сейчас проходит Challenge 'Фокус на лето' (ФНЛ).\n\n Подробнее:https://t.me/Focus_On_Summer"
     else:
         text = "Информация обновляется"
     
@@ -112,13 +112,15 @@ FAREWELLS = [
 ]
 
 async def track_gym_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
     if update.message and update.message.new_chat_members:
         for user in update.message.new_chat_members:
             if not user.is_bot:
                 greeting = random.choice(GREETINGS).format(name=user.first_name)
                 await update.message.reply_text(greeting)
                 await update.message.reply_text(MANDATORY_GREETING)
-                
+                await query.answer()
+
                 bot_username = (await context.bot.get_me()).username
                 keyboard = [[InlineKeyboardButton("🔵 Начать общение", url=f"https://t.me/{bot_username}")]]
                 await update.message.reply_text(

@@ -119,7 +119,6 @@ async def track_gym_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 greeting = random.choice(GREETINGS).format(name=user.first_name)
                 await update.message.reply_text(greeting)
                 await update.message.reply_text(MANDATORY_GREETING)
-                await query.answer()
 
                 bot_username = (await context.bot.get_me()).username
                 keyboard = [[InlineKeyboardButton("🔵 Начать общение", url=f"https://t.me/{bot_username}")]]

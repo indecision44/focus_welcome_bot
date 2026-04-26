@@ -27,7 +27,7 @@ async def start(update: Update, context):
         reply_markup=get_private_keyboard()
     )
 
-async def private_info(update: Update, context):
+async def private_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
@@ -42,7 +42,8 @@ async def private_info(update: Update, context):
     else:
         text = "Информация обновляется"
     
-    await query.edit_message_text(text)
+    # Отправляем НОВОЕ сообщение (кнопки остаются)
+    await query.message.reply_text(text)
 # def get_welcome_keyboard():
 #     keyboard = [
 #         [InlineKeyboardButton("📅 Расписание", callback_data='schedule')],

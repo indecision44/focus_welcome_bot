@@ -122,8 +122,12 @@ async def webhook_handler(request):
 async def setup_webhook():
     render_url = os.environ.get("RENDER_EXTERNAL_URL")
     if not render_url:
-        print("Ошибка: RENDER_EXTERNAL_URL не найден")
-        return False
+        # Заглушка — впишите свой URL из Render
+        render_url = "https://focus-welcome-bot.onrender.com"
+    webhook_url = f"{render_url}/webhook/{TOKEN}"
+    await application.bot.set_webhook(webhook_url)
+    print(f"✅ Webhook установлен: {webhook_url}")
+    return True
     
     webhook_url = f"{render_url}/webhook/{TOKEN}"
     await application.bot.set_webhook(webhook_url)

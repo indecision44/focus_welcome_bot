@@ -7,7 +7,6 @@ import datetime
 import os
 import sys
 import asyncio
-import 
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not TOKEN:

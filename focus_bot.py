@@ -1,5 +1,5 @@
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, BotCommand
 from telegram.ext import Application, MessageHandler, filters, CommandHandler, CallbackQueryHandler, ContextTypes
 from aiohttp import web
 import random
@@ -7,50 +7,68 @@ import datetime
 import os
 import sys
 import asyncio
+import 
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not TOKEN:
     raise ValueError("TELEGRAM_BOT_TOKEN not set")
 
 #Обработчик кнопок
-def get_private_keyboard():
-    keyboard = [
-        [InlineKeyboardButton("📅 Расписание", callback_data='schedule')],
-        [InlineKeyboardButton("🎒 Что взять", callback_data='what_to_take')],
-        [InlineKeyboardButton("📍 Где находимся", callback_data='location')],
-        [InlineKeyboardButton("📢 Новости", callback_data='news')],
-    ]
-    return InlineKeyboardMarkup(keyboard)
-async def start(update: Update, context):
+async def cmd_schedule(update: Update, context):
     await update.message.reply_text(
-        "👋 Добро пожаловать в Focus!\n\nВыбери интересующий раздел:",
-        reply_markup=get_private_keyboard()
+        "📅 Расписание находится на вкладке 📅расписание и обновляется каждую неделю! Бегом записываться🏃🏃🏃!!!\n\n"
+        "Если после голосования ваши планы изменились и вы не сможете прийти на тренировку, пожалуйста, отмените свой голос в опросе ❌ (или переголосуйте🔄).\n\n"
+        "Это поможет тренеру и нам точнее понимать, сколько человек будет. Спасибо за понимание! 🙌\n\n"
+        "⚠️ Важно: не сможете прийти — отмените свой голос в опросе ❌"
     )
 
-async def private_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
+async def cmd_what_to_take(update: Update, context):
+    await update.message.reply_text(
+        "🎒 Что взять на тренировку:\n"
+        "✅ полотенце\n"
+        "✅ удобная обувь\n"
+        "✅ удобная одежда\n"
+        "✅ вода / бутылка для воды\n"
+        "✅ хорошее настроение"
+    )
+
+async def cmd_location(update: Update, context):
+    await update.message.reply_text(
+        "📍 Адрес: проспект Дзержинского, 19 (вход с ул.Щорса, 2 этаж - над Белинвестбанком)"
+    )
+
+async def cmd_news(update: Update, context):
+    await update.message.reply_text(
+        "📢 Новости:\n"
+        "Фокус-привет! Мы не устаем удивлять и вытягивать Вас из зоны комфорта. "
+        "Планируем закрытую актив-группу на соревнования Crace/Hyrox в Питер 13-14 июня. "
+        "Число мест ограничено. При заинтересованности пишите в директ 😜."
+    )
+
+async def set_persistent_menu(app):
+    """Устанавливает команды над клавиатурой"""
+    commands = [
+        BotCommand("schedule", "📅 Расписание"),
+        BotCommand("what_to_take", "🎒 Что взять"),
+        BotCommand("location", "📍 Где находимся"),
+        BotCommand("news", "📢 Новости"),
+    ]
+    await app.bot.set_my_commands(commands)
+
+# В функции start_webhook() (или main) добавьте:
+async def start_webhook():
+    global application
     
-    if query.data == 'schedule':
-        text = "📅 Расписание находится на вкладке 📅расписание и обновляется каждую неделю! Бегом записываться🏃🏃🏃!!!\n\nЕсли после голосования ваши планы изменились и вы не сможете прийти на тренировку,пожалуйста, отмените свой голос в опросе ❌(или переголосуйте🔄).\n\n Это поможет тренеру и нам точнее понимать, сколько человек будет.Спасибо за понимание! 🙌\n\n⚠️ Важно: не сможете прийти — отмените свой голос в опросе ❌"
-    elif query.data == 'what_to_take':
-        text = "🎒 Что взять на тренировку:\n✅ полотенце\n✅ удобная обувь\n✅ удобная одежда\n✅ вода / бутылка для воды\n✅ хорошее настроение"
-    elif query.data == 'location':
-        text = "📍 Адрес: проспект Дзержинского, 19 (вход с ул.Щорса, 2 этаж - над Белинвестбанком)"
-    elif query.data == 'news':
-        text = "📢 Новости:\nФокус-привет! Мы не устаем удивлять и вытягивать Вас из зоны комфорта. Планируем закрытую актив-группу на соревнования Crace/Hyrox в Питер 13-14 июня. Число мест ограничено. При заинтересованности пишите в директ 😜.\n\n"
-    else:
-        text = "Информация обновляется"
+    application = Application.builder().token(TOKEN).build()
     
-    # Отправляем НОВОЕ сообщение (кнопки остаются)
-    await query.message.reply_text(text)
-# def get_welcome_keyboard():
-#     keyboard = [
-#         [InlineKeyboardButton("📅 Расписание", callback_data='schedule')],
-#         [InlineKeyboardButton("🎒 Что взять", callback_data='what_to_take')],
-#         [InlineKeyboardButton("📍 Где находимся", callback_data='news')],
-#     ]
-#     return InlineKeyboardMarkup(keyboard)
+    # Устанавливаем persistent menu (команды над клавиатурой)
+    await set_persistent_menu(application)
+    
+    # Добавляем обработчики команд
+    application.add_handler(CommandHandler("schedule", cmd_schedule))
+    application.add_handler(CommandHandler("what_to_take", cmd_what_to_take))
+    application.add_handler(CommandHandler("location", cmd_location))
+    application.add_handler(CommandHandler("news", cmd_news))
 
 # Приветствия для спортзала
 GREETINGS = [

@@ -154,8 +154,8 @@ async def test_join(update: Update, context):
     greeting = random.choice(GREETINGS).format(name=test_name)
     await update.message.reply_text(greeting)
     await update.message.reply_text(MANDATORY_GREETING)
-    await update.message.reply_text(f"👋 {test_name}, что тебя интересует?", reply_markup=get_private_keyboard())
-
+    await update.message.reply_text(f"👋 {test_name}, используй команды над клавиатурой для информации!")
+                                    
 async def test_leave(update: Update, context):
     test_name = "ТестовыйНовичок"
     await update.message.reply_text("🧪 **ТЕСТ ВЫХОДА**\nИмитирую уход участника...")
@@ -188,10 +188,13 @@ async def main():
     
     # Добавляем обработчики
     bot_application.add_handler(MessageHandler(filters.StatusUpdate.ALL, track_gym_members))
-    bot_application.add_handler(CommandHandler("test1", test_join))
-    bot_application.add_handler(CommandHandler("test2", test_leave))
-    bot_application.add_handler(CommandHandler("start", start))
-    bot_application.add_handler(CallbackQueryHandler(private_info))
+    bot_application.add_handler(CommandHandler("test1", test_join)) # при вводе команды /test1 вызывается функция test_join"
+    bot_application.add_handler(CommandHandler("test2", test_leave)) # при вводе команды /test2 вызывается функция test_join"
+    ###### при нажатии этих кнопок вызываются функции cmd_schedule и тд"########
+    bot_application.add_handler(CommandHandler("schedule", cmd_schedule)) 
+    bot_application.add_handler(CommandHandler("what_to_take", cmd_what_to_take))
+    bot_application.add_handler(CommandHandler("location", cmd_location))
+    bot_application.add_handler(CommandHandler("news", cmd_news))
     await bot_application.initialize()
     await bot_application.start()
     

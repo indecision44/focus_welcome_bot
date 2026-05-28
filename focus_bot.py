@@ -148,6 +148,15 @@ async def track_gym_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
             farewell = random.choice(FAREWELLS).format(name=user.first_name)
             await update.message.reply_text(farewell)
 
+async def cmd_start(update: Update, context):
+    await update.message.reply_text(
+        "👋 Добро пожаловать в Focus!\n\n"
+        "Используй команды над клавиатурой:\n"
+        "• /schedule — Расписание\n"
+        "• /what_to_take — Что взять\n"
+        "• /location — Где находимся\n"
+        "• /news — Новости"
+    )
 async def test_join(update: Update, context):
     test_name = "ТестовыйНовичок"
     await update.message.reply_text("🧪 **ТЕСТ ВХОДА**\nИмитирую появление нового участника...")
@@ -186,7 +195,8 @@ async def main():
     global bot_application
     bot_application = Application.builder().token(TOKEN).build()
     
-    # Добавляем обработчики
+    #========================= СПИСОК ОБРАБОТЧИКОВ=================================
+
     bot_application.add_handler(MessageHandler(filters.StatusUpdate.ALL, track_gym_members))
     bot_application.add_handler(CommandHandler("test1", test_join)) # при вводе команды /test1 вызывается функция test_join"
     bot_application.add_handler(CommandHandler("test2", test_leave)) # при вводе команды /test2 вызывается функция test_join"
@@ -195,9 +205,12 @@ async def main():
     bot_application.add_handler(CommandHandler("what_to_take", cmd_what_to_take))
     bot_application.add_handler(CommandHandler("location", cmd_location))
     bot_application.add_handler(CommandHandler("news", cmd_news))
+    bot_application.add_handler(CommandHandler("start", cmd_start))
     await bot_application.initialize()
     await bot_application.start()
     
+    #================================================================================
+
     # Устанавливаем webhook
     render_url = os.environ.get("RENDER_EXTERNAL_URL", "https://focus-welcome-bot.onrender.com")
     webhook_url = f"{render_url}/webhook/{TOKEN}"

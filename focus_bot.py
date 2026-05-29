@@ -23,7 +23,7 @@ async def cmd_schedule(update: Update, context):
     # ID группы без -100 (например, если ID -1001234567890, то берём 1234567890)
     group_id = "1234567890"  # Замените на ID вашей группы (без -100)
     topic_id = "1"  # Замените на ID темы "Расписание"
-    schedule_topic_link = f"https://t.me/c/focus_grushevka/307"
+    schedule_topic_link = f"https://t.me/focus_grushevka/307/308"
     
     keyboard = [[InlineKeyboardButton("📅 Записаться на тренировку", url=schedule_topic_link)]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -57,7 +57,7 @@ async def cmd_news(update: Update, context):
     # ID группы без -100 (например, если ID -1001234567890, то берём 1234567890)
     group_id = "1234567890"  # Замените на ID вашей группы (без -100)
     topic_id = "1"  # Замените на ID темы "Расписание"
-    news_topic_link = f"https://t.me/c/focus_grushevka/1461"
+    news_topic_link = f"https://t.me/focus_grushevka/1461/1461"
     
     keyboard = [[InlineKeyboardButton("📢 Ознакомиться с предстоящими мероприятиями", url=news_topic_link)]]
     reply_markup = InlineKeyboardMarkup(keyboard)

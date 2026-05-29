@@ -196,7 +196,7 @@ async def main():
     bot_application.add_handler(CommandHandler("what_to_take", cmd_what_to_take))
     bot_application.add_handler(CommandHandler("location", cmd_location))
     bot_application.add_handler(CommandHandler("news", cmd_news))
-    bot_application.add_handler(CommandHandler("training_format", cmd_news))
+    bot_application.add_handler(CommandHandler("training_format", cmd_training_format))
     
     await bot_application.initialize()
     await bot_application.start()

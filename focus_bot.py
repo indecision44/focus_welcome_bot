@@ -157,6 +157,7 @@ async def cmd_start(update: Update, context):
         "• /location — Где находимся\n"
         "• /news — Новости"
     )
+    #============================ТЕСТОВЫЙ БОТ====================================
 async def test_join(update: Update, context):
     test_name = "ТестовыйНовичок"
     await update.message.reply_text("🧪 **ТЕСТ ВХОДА**\nИмитирую появление нового участника...")

@@ -48,14 +48,22 @@ async def cmd_news(update: Update, context):
         "Число мест ограничено. При заинтересованности пишите в директ 😜."
     )
 
+async def cmd_training_format(update: Update, context):
+    await update.message.reply_text(
+        "❤️ Кардио-тренировка.\nЭто тренировка, направленная на развитие выносливости и укрепление сердечно-сосудистой системы. В основе — циклические движения в умеренном или высоком темпе: гребля, велосипед, берпи, выпады и т.д. Кардио ускоряет метаболизм, помогает эффективно сжигать калории и снижает уровень стресса\n"
+        "💪 Силовая тренировка.\nЭто работа с отягощениями (гантели, штанги, тренажёры, собственный вес) для развития мышечной силы, массы и выносливости. Силовые упражнения стимулируют рост мышц, укрепляют костную ткань, ускоряют обмен веществ и формируют подтянутое, сильное тело. Подходят как для новичков, так и для продвинутых атлетов — важно лишь правильно подобрать нагрузку\n"
+        "🔄 Гибридная тренировка.\n Это комбинация кардио- и силовых элементов в одном занятии. Цель — развить одновременно выносливость, силу и функциональность. Гибридный формат лежит в основе таких дисциплин, как HYROX/CRACE: Идеальный выбор для тех, кто хочет быть сильным, выносливым и готовым к любым физическим вызовам\n"
+    )
+
 async def cmd_start(update: Update, context):
     await update.message.reply_text(
         "👋 Добро пожаловать в Focus!\n\n"
-        "Используй команды над клавиатурой:\n"
+        "Используй кнопки в меню слева:\n"
         "• /schedule — Расписание\n"
         "• /what_to_take — Что взять\n"
         "• /location — Где находимся\n"
-        "• /news — Новости"
+        "• /news — Новости\n"
+        "• /training_format — Новости"
     )
 
 # ==================== ТЕСТОВЫЕ КОМАНДЫ ====================
@@ -65,7 +73,7 @@ async def test_join(update: Update, context):
     greeting = random.choice(GREETINGS).format(name=test_name)
     await update.message.reply_text(greeting)
     await update.message.reply_text(MANDATORY_GREETING)
-    await update.message.reply_text(f"👋 {test_name}, используй команды над клавиатурой для информации!")
+    await update.message.reply_text(f"👋 {test_name}, используй кнопки в меню слева!")
 
 async def test_leave(update: Update, context):
     test_name = "ТестовыйНовичок"
@@ -133,7 +141,7 @@ async def track_gym_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 bot_username = (await context.bot.get_me()).username
                 keyboard = [[InlineKeyboardButton("🔵 Начать общение", url=f"https://t.me/{bot_username}")]]
                 await update.message.reply_text(
-                    f"👋 {user.first_name}, нажми на кнопку ниже, чтобы открыть чат со мной.",
+                    f"👋 {user.first_name}, нажми на кнопку ниже, чтобы открыть чат со мной. Я могу рассказать тебе много интересного!",
                     reply_markup=InlineKeyboardMarkup(keyboard)
                 )
     if update.message and update.message.left_chat_member:
@@ -149,6 +157,7 @@ async def set_persistent_menu(app):
         BotCommand("what_to_take", "🎒 Что взять"),
         BotCommand("location", "📍 Где находимся"),
         BotCommand("news", "📢 Новости"),
+        BotCommand("training_format", "🏋 Формат тренировок"),
     ]
     await app.bot.set_my_commands(commands)
     print("✅ Persistent menu установлен", flush=True)
@@ -187,6 +196,7 @@ async def main():
     bot_application.add_handler(CommandHandler("what_to_take", cmd_what_to_take))
     bot_application.add_handler(CommandHandler("location", cmd_location))
     bot_application.add_handler(CommandHandler("news", cmd_news))
+    bot_application.add_handler(CommandHandler("training_format", cmd_news))
     
     await bot_application.initialize()
     await bot_application.start()

@@ -1,24 +1,22 @@
 import sys
 print("=== БОТ НАЧИНАЕТ ЗАГРУЗКУ ===", flush=True)
-sys.stdout.flush()
 
-from telegram.ext import Application, MessageHandler, filters, CommandHandler
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, BotCommand
-from telegram.ext import Application, MessageHandler, filters, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram import Update, BotCommand, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, MessageHandler, filters, CommandHandler, ContextTypes
 from aiohttp import web
 import random
 import datetime
 import os
-import sys
 import asyncio
 
-TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 print("=== ИМПОРТЫ ЗАГРУЖЕНЫ ===", flush=True)
+
+TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 print(f"Токен установлен: {'ДА' if TOKEN else 'НЕТ'}", flush=True)
 if not TOKEN:
     raise ValueError("TELEGRAM_BOT_TOKEN not set")
 
-#Обработчик кнопок
+# ==================== КОМАНДЫ ДЛЯ PERSISTENT MENU ====================
 async def cmd_schedule(update: Update, context):
     await update.message.reply_text(
         "📅 Расписание находится на вкладке 📅расписание и обновляется каждую неделю! Бегом записываться🏃🏃🏃!!!\n\n"
@@ -50,32 +48,32 @@ async def cmd_news(update: Update, context):
         "Число мест ограничено. При заинтересованности пишите в директ 😜."
     )
 
-async def set_persistent_menu(app):
-    """Устанавливает команды над клавиатурой"""
-    commands = [
-        BotCommand("schedule", "📅 Расписание"),
-        BotCommand("what_to_take", "🎒 Что взять"),
-        BotCommand("location", "📍 Где находимся"),
-        BotCommand("news", "📢 Новости"),
-    ]
-    await app.bot.set_my_commands(commands)
+async def cmd_start(update: Update, context):
+    await update.message.reply_text(
+        "👋 Добро пожаловать в Focus!\n\n"
+        "Используй команды над клавиатурой:\n"
+        "• /schedule — Расписание\n"
+        "• /what_to_take — Что взять\n"
+        "• /location — Где находимся\n"
+        "• /news — Новости"
+    )
 
-# В функции start_webhook() (или main) добавьте:
-async def start_webhook():
-    global application
-    print("=== ФУНКЦИЯ start_webhook() ВЫЗВАНА ===", flush=True)
-    application = Application.builder().token(TOKEN).build()
-    
-    # Устанавливаем persistent menu (команды над клавиатурой)
-    await set_persistent_menu(application)
-    
-    # Добавляем обработчики команд
-    application.add_handler(CommandHandler("schedule", cmd_schedule))
-    application.add_handler(CommandHandler("what_to_take", cmd_what_to_take))
-    application.add_handler(CommandHandler("location", cmd_location))
-    application.add_handler(CommandHandler("news", cmd_news))
+# ==================== ТЕСТОВЫЕ КОМАНДЫ ====================
+async def test_join(update: Update, context):
+    test_name = "ТестовыйНовичок"
+    await update.message.reply_text("🧪 **ТЕСТ ВХОДА**\nИмитирую появление нового участника...")
+    greeting = random.choice(GREETINGS).format(name=test_name)
+    await update.message.reply_text(greeting)
+    await update.message.reply_text(MANDATORY_GREETING)
+    await update.message.reply_text(f"👋 {test_name}, используй команды над клавиатурой для информации!")
 
-# Приветствия для спортзала
+async def test_leave(update: Update, context):
+    test_name = "ТестовыйНовичок"
+    await update.message.reply_text("🧪 **ТЕСТ ВЫХОДА**\nИмитирую уход участника...")
+    farewell = random.choice(FAREWELLS).format(name=test_name)
+    await update.message.reply_text(farewell)
+
+# ==================== ПРИВЕТСТВИЯ ====================
 GREETINGS = [
     "💪 Добро пожаловать в зал, {name}! Сегодня день ног?",
     "💪 Привет, {name}! Сегодня день ног или снова грудь?",
@@ -105,17 +103,7 @@ GREETINGS = [
     "🦵 {name} пришел! Присед со штангой или на тренажере?",
     "💪 {name} в зале! Бицепс 40 см будет?",
     "🔥 {name} с нами! Становая тяга ждет",
-    "🎯 {name} явился! Турник свободен, беги",
-    "💪 {name} в игре! Разминайся",
-    "🔥 {name} зашел на рекорд!",
-    "🏋️ {name} с нами! Ждем новых достижений",
-    "🦾 {name} в строю! Покажи, на что способен",
-    "⚡ {name} заряжен на тренировку!",
-    "🌟 {name} с нами! Сегодня точно будет прогресс",
-    "🎯 {name} в деле! Цель вижу — препятствий нет",
-    "💫 {name} присоединился! Рабочая атмосфера обеспечена",
-    "👊 {name} с нами! Жми лежа, не лежа",
-    "🏆 {name} в зале! Новые рекорды уже близко"
+    "🎯 {name} явился! Турник свободен, беги"
 ]
 
 MANDATORY_GREETING = "📢 Добро пожаловать в чат Focus!🔴🔵⚪️\n\nFocus — это энергичные групповые тренировки по 45 минут с постоянно обновляющимися программами, сочетанием силы, кардио и сильной командной атмосферой. Каждое занятие - новый формат, чтобы тело постоянно прогрессировало.\n\n📎В закреплённых сообщениях — важная информация.\n\nЕсли ты здесь впервые - записывайся на свою первую тренировку (Вкладка «📅Расписание») - и почувствуй наш формат на практике🔥"
@@ -133,8 +121,8 @@ FAREWELLS = [
     "✅ {name}, тренировка завершена. Молодец!"
 ]
 
+# ==================== ОТСЛЕЖИВАНИЕ УЧАСТНИКОВ ====================
 async def track_gym_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
     if update.message and update.message.new_chat_members:
         for user in update.message.new_chat_members:
             if not user.is_bot:
@@ -154,38 +142,22 @@ async def track_gym_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
             farewell = random.choice(FAREWELLS).format(name=user.first_name)
             await update.message.reply_text(farewell)
 
-async def cmd_start(update: Update, context):
-    await update.message.reply_text(
-        "👋 Добро пожаловать в Focus!\n\n"
-        "Используй команды над клавиатурой:\n"
-        "• /schedule — Расписание\n"
-        "• /what_to_take — Что взять\n"
-        "• /location — Где находимся\n"
-        "• /news — Новости"
-    )
-    #============================ТЕСТОВЫЙ БОТ====================================
-async def test_join(update: Update, context):
-    test_name = "ТестовыйНовичок"
-    await update.message.reply_text("🧪 **ТЕСТ ВХОДА**\nИмитирую появление нового участника...")
-    greeting = random.choice(GREETINGS).format(name=test_name)
-    await update.message.reply_text(greeting)
-    await update.message.reply_text(MANDATORY_GREETING)
-    await update.message.reply_text(f"👋 {test_name}, используй команды над клавиатурой для информации!")
-                                    
-async def test_leave(update: Update, context):
-    test_name = "ТестовыйНовичок"
-    await update.message.reply_text("🧪 **ТЕСТ ВЫХОДА**\nИмитирую уход участника...")
-    farewell = random.choice(FAREWELLS).format(name=test_name)
-    await update.message.reply_text(farewell)
+# ==================== PERSISTENT MENU ====================
+async def set_persistent_menu(app):
+    commands = [
+        BotCommand("schedule", "📅 Расписание"),
+        BotCommand("what_to_take", "🎒 Что взять"),
+        BotCommand("location", "📍 Где находимся"),
+        BotCommand("news", "📢 Новости"),
+    ]
+    await app.bot.set_my_commands(commands)
+    print("✅ Persistent menu установлен", flush=True)
 
-# ========== Webhook обработчик для aiohttp ==========
+# ==================== WEBHOOK ====================
 async def webhook(request):
-    """Принимает JSON от Telegram и передаёт в приложение бота"""
     try:
         data = await request.json()
-        # Создаём объект Update из JSON
         update = Update.de_json(data, bot_application.bot)
-        # Ставим задачу на обработку в фоне (чтобы не блокировать ответ)
         asyncio.create_task(bot_application.process_update(update))
         return web.Response(text="OK")
     except Exception as e:
@@ -195,29 +167,30 @@ async def webhook(request):
 async def health(request):
     return web.Response(text="OK")
 
-# Глобальная переменная для приложения бота
 bot_application = None
 
 async def main():
     global bot_application
+    print("=== ЗАПУСК MAIN ===", flush=True)
+    
     bot_application = Application.builder().token(TOKEN).build()
     
-    #========================= СПИСОК ОБРАБОТЧИКОВ=================================
-
+    # Устанавливаем persistent menu
+    await set_persistent_menu(bot_application)
+    
+    # Добавляем обработчики
     bot_application.add_handler(MessageHandler(filters.StatusUpdate.ALL, track_gym_members))
-    bot_application.add_handler(CommandHandler("test1", test_join)) # при вводе команды /test1 вызывается функция test_join"
-    bot_application.add_handler(CommandHandler("test2", test_leave)) # при вводе команды /test2 вызывается функция test_join"
-    ###### при нажатии этих кнопок вызываются функции cmd_schedule и тд"########
-    bot_application.add_handler(CommandHandler("schedule", cmd_schedule)) 
+    bot_application.add_handler(CommandHandler("test1", test_join))
+    bot_application.add_handler(CommandHandler("test2", test_leave))
+    bot_application.add_handler(CommandHandler("start", cmd_start))
+    bot_application.add_handler(CommandHandler("schedule", cmd_schedule))
     bot_application.add_handler(CommandHandler("what_to_take", cmd_what_to_take))
     bot_application.add_handler(CommandHandler("location", cmd_location))
     bot_application.add_handler(CommandHandler("news", cmd_news))
-    bot_application.add_handler(CommandHandler("start", cmd_start))
+    
     await bot_application.initialize()
     await bot_application.start()
     
-    #================================================================================
-
     # Устанавливаем webhook
     render_url = os.environ.get("RENDER_EXTERNAL_URL", "https://focus-welcome-bot.onrender.com")
     webhook_url = f"{render_url}/webhook/{TOKEN}"
@@ -235,7 +208,6 @@ async def main():
     await site.start()
     print("🚀 Бот запущен и слушает webhook")
     
-    # Держим сервер запущенным
     await asyncio.Event().wait()
 
 if __name__ == "__main__":

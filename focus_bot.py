@@ -1,3 +1,7 @@
+import sys
+print("=== БОТ НАЧИНАЕТ ЗАГРУЗКУ ===", flush=True)
+sys.stdout.flush()
+
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, BotCommand
 from telegram.ext import Application, MessageHandler, filters, CommandHandler, CallbackQueryHandler, ContextTypes
@@ -9,6 +13,8 @@ import sys
 import asyncio
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+print("=== ИМПОРТЫ ЗАГРУЖЕНЫ ===", flush=True)
+print(f"Токен установлен: {'ДА' if TOKEN else 'НЕТ'}", flush=True)
 if not TOKEN:
     raise ValueError("TELEGRAM_BOT_TOKEN not set")
 
@@ -57,7 +63,7 @@ async def set_persistent_menu(app):
 # В функции start_webhook() (или main) добавьте:
 async def start_webhook():
     global application
-    
+    print("=== ФУНКЦИЯ start_webhook() ВЫЗВАНА ===", flush=True)
     application = Application.builder().token(TOKEN).build()
     
     # Устанавливаем persistent menu (команды над клавиатурой)

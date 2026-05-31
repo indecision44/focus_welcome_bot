@@ -64,7 +64,7 @@ async def cmd_news(update: Update, context):
     
     await update.message.reply_text(
         "📅 Фокус не перестает удивлять и регулярно анонсирует новые мероприятия!!!\n"
-        "Интересно, что у нас сейчас по плану?).\n\n",
+        "Интересно, что у нас сейчас по плану?)👇👇👇\n\n",
         reply_markup=reply_markup
     )
 
@@ -80,7 +80,7 @@ async def cmd_start(update: Update, context):
         "👋 Добро пожаловать в Focus!\n\n"
         "Используй кнопки в меню слева:\n"
         "• /schedule — Расписание\n"
-        "• /what_to_take — Что взять\n"
+        "• /what_to_take — Что взять на тренировку\n"
         "• /location — Где находимся\n"
         "• /news — Новости\n"
         "• /training_format — Новости"
@@ -175,7 +175,7 @@ async def set_persistent_menu(app):
     commands = [
         BotCommand("training_format", "🏋 Формат тренировок"),
         BotCommand("schedule", "📅 Расписание"),
-        BotCommand("what_to_take", "🎒 Что взять"),
+        BotCommand("what_to_take", "🎒 Что взять на тренировку:"),
         BotCommand("location", "📍 Где находимся"),
         BotCommand("news", "📢 Новости"),
     ]

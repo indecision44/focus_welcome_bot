@@ -153,16 +153,25 @@ async def track_gym_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message and update.message.new_chat_members:
         for user in update.message.new_chat_members:
             if not user.is_bot:
-                greeting = random.choice(GREETINGS).format(name=user.first_name)
-                await update.message.reply_text(greeting)
-                await update.message.reply_text(MANDATORY_GREETING)
-
                 bot_username = (await context.bot.get_me()).username
+                greeting = random.choice(GREETINGS).format(name=user.first_name)
+                
+                # Формируем ОДНО сообщение со всем текстом
+                full_text = (
+                    f"{greeting}\n\n"
+                    f"{MANDATORY_GREETING}\n\n"
+                    f"👋 {user.first_name}, нажми на кнопку ниже, чтобы открыть чат со мной. "
+                    f"Я могу рассказать тебе много интересного!"
+                )
+                
                 keyboard = [[InlineKeyboardButton("🔵 Начать общение", url=f"https://t.me/{bot_username}")]]
+                
+                # Отправляем ОДНО сообщение с текстом и кнопкой
                 await update.message.reply_text(
-                    f"👋 {user.first_name}, нажми на кнопку ниже, чтобы открыть чат со мной. Я могу рассказать тебе много интересного!",
+                    full_text,
                     reply_markup=InlineKeyboardMarkup(keyboard)
                 )
+    
     if update.message and update.message.left_chat_member:
         user = update.message.left_chat_member
         if not user.is_bot:

@@ -217,7 +217,7 @@ async def main():
     
     # Добавляем обработчики
     bot_application.add_handler(MessageHandler(filters.StatusUpdate.ALL, track_gym_members))
-    bot_application.add_handler(CommandHandler("test1", test_join))
+    bot_application.add_handler(CommandHandler("test153263463633o2oro", track_gym_members))
     bot_application.add_handler(CommandHandler("test2", test_leave))
     bot_application.add_handler(CommandHandler("start", cmd_start))
     bot_application.add_handler(CommandHandler("schedule", cmd_schedule))

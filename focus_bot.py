@@ -91,8 +91,7 @@ async def test_join(update: Update, context):
     test_name = "ТестовыйНовичок"
     await update.message.reply_text("🧪 **ТЕСТ ВХОДА**\nИмитирую появление нового участника...")
     greeting = random.choice(GREETINGS).format(name=test_name)
-    await update.message.reply_text(greeting)
-    await update.message.reply_text(MANDATORY_GREETING)
+    await update.message.reply_text(greeting + "\n\n" + MANDATORY_GREETING)
     await update.message.reply_text(f"👋 {test_name}, используй кнопки в меню слева!")
 
 async def test_leave(update: Update, context):

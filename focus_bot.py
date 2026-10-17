@@ -29,11 +29,14 @@ async def cmd_schedule(update: Update, context):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        "Расписание находится на вкладке 📅расписание и обновляется каждую неделю! Бегом записываться🏃🏃🏃!!!\n\n"
-        "Если после голосования ваши планы изменились и вы не сможете прийти на тренировку, пожалуйста, отмените свой голос в опросе ❌ (или переголосуйте🔄).\n\n"
-        "Это поможет тренеру и нам точнее понимать, сколько человек будет. Спасибо за понимание! 🙌\n\n"
-        "⚠️ Важно: не сможете прийти — отмените свой голос в опросе ❌",
-        reply_markup=reply_markup
+        "Чтобы записаться на тренировки, выберите любой удобный способ:\n"
+       " 1️⃣ Приложение Focusfit\n"
+        "• Скачать для iOS https://apps.apple.com/us/app/focusfit/id6820365623?l=ru\n"
+        "• Скачать для Android https://my.focusfit.by/app/android\n"
+       " 2️⃣ Бот в Телеграм: @FocusFitby_bot\n"
+       " 3️⃣ Личный кабинет на сайте: Focusfit.by\n\n"
+        "По вопросам восстановления пароля или регистрации обращайтесь в личные сообщения: @volha_s0501"
+       #reply_markup=reply_markup
     )
 
 async def cmd_what_to_take(update: Update, context):
@@ -48,7 +51,8 @@ async def cmd_what_to_take(update: Update, context):
 
 async def cmd_location(update: Update, context):
     await update.message.reply_text(
-        "📍 Адрес: проспект Дзержинского, 19 (вход с ул.Щорса, 2 этаж - над Белинвестбанком)"
+        '<a href="https://yandex.by/maps/157/minsk/?ll=27.516655%2C53.885821&mode=poi&poi%5Bpoint%5D=27.516436%2C53.885706&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D174813420075&z=20.29">📍 Адрес: проспект Дзержинского, 19 (вход с ул.Щорса, 2 этаж - над Белинвестбанком</a>',
+        parse_mode="HTML"
     )
 
 async def cmd_news(update: Update, context):
@@ -217,7 +221,7 @@ async def main():
     
     # Добавляем обработчики
     bot_application.add_handler(MessageHandler(filters.StatusUpdate.ALL, track_gym_members))
-    bot_application.add_handler(CommandHandler("test153263463633o2oro", track_gym_members))
+    bot_application.add_handler(CommandHandler("test1", test_join))
     bot_application.add_handler(CommandHandler("test2", test_leave))
     bot_application.add_handler(CommandHandler("start", cmd_start))
     bot_application.add_handler(CommandHandler("schedule", cmd_schedule))
